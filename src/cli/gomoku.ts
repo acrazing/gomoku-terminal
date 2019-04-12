@@ -8,7 +8,7 @@ import { render } from 'ink';
 import { AsyncTrunk } from 'mobx-sync';
 import { createElement } from 'react';
 import yargs, { Arguments } from 'yargs';
-import { Gomoku } from '../scenes/Gomoku';
+import { Application } from '../scenes/Application';
 import { GomokuStore } from '../store/GomokuStore';
 import { UserStore } from '../store/UserStore';
 import { FSStorage } from '../utils/misc/FSStorage';
@@ -45,7 +45,7 @@ async function gomoku() {
   };
   const trunk = new AsyncTrunk(store, { storage, delay: 50 });
   await trunk.init();
-  const ink = render(createElement(Gomoku));
+  const ink = render(createElement(Application));
   await ink.waitUntilExit();
 }
 

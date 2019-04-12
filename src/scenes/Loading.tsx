@@ -5,9 +5,9 @@
 
 import { Box, Text } from 'ink';
 import * as React from 'react';
-import { PureComponent } from 'react';
+import { Component } from 'react';
 
-export class Loading extends PureComponent {
+export class Loading extends Component {
   render() {
     return (
       <Box>
