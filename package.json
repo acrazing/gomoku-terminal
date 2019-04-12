@@ -1,0 +1,109 @@
+{
+  "name": "gomoku-terminal",
+  "version": "1.0.0",
+  "description": "A terminal gomoku online game based on react & ink",
+  "author": "acrazing <joking.young@gmail.com>",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "assets/",
+    "lib/",
+    "src/"
+  ],
+  "bin": {
+    "gomoku": "lib/cli/gomoku.js"
+  },
+  "scripts": {
+    "clean": "rm -rf lib .cache",
+    "build": "tsc",
+    "prepublishOnly": "run-s clean build",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:acrazing/gomoku-terminal.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/benchmark": "^1.0.31",
+    "@types/jest": "^23.3.10",
+    "benchmark": "^2.1.4",
+    "husky": "^1.1.4",
+    "jest": "^23.6.0",
+    "lint-staged": "^8.0.5",
+    "npm-run-all": "^4.1.3",
+    "prettier": "^1.15.3",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "@types/node": "^11.13.4",
+    "@types/react": "^16.8.13",
+    "ink": "^2.1.1",
+    "mobx": "^5.9.4",
+    "mobx-react": "^5.4.3",
+    "monofile-utilities": "^4.5.0",
+    "react": "^16.8.6",
+    "tiny-emitter": "^2.1.0",
+    "tslib": "^1.9.3",
+    "yargs": "^13.2.2"
+  },
+  "cliVersion": "8.8.2",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "linters": {
+      "*.{js,jsx,ts,tsx,json,css,less,scss,md}": [
+        "prettier --write",
+        "git add"
+      ]
+    },
+    "ignore": [
+      "**/assets/**/*"
+    ]
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node",
+      "mjs"
+    ],
+    "cacheDirectory": ".cache/jest",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "<rootDir>/src/**/*.{ts,tsx}",
+      "!**/*.d.ts"
+    ],
+    "coverageDirectory": "temp/coverage",
+    "globals": {
+      "__DEV__": true,
+      "ENV": {}
+    },
+    "testMatch": [
+      "<rootDir>/src/**/*.spec.{ts,tsx}"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "jsxSingleQuote": false,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "jsxBracketSameLine": false,
+    "arrowParens": "always",
+    "endOfLine": "lf"
+  }
+}

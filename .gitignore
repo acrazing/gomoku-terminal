@@ -1,0 +1,16 @@
+node_modules/
+.cache/
+temp/
+esm/
+cjs/
+lib/
+*.log
+.DS_Store
+.DS_Store*
+*~
+.*~
+*.swp
+.*.swp
+*.tgz
+.idea/
+.vscode/
