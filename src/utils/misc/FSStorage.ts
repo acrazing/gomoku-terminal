@@ -13,11 +13,21 @@ export class FSStorage implements AsyncStorage {
   constructor(readonly filename: string) {}
 
   init() {
+    const pidFile = this.filename + '.lock';
     try {
-      fs.writeFileSync(this.filename + '.lock', process.pid + '', {
+      fs.writeFileSync(pidFile, process.pid + '', {
         flag: 'wx',
       });
     } catch (e) {
+      if (e.code === 'EEXIST') {
+        let pid = '';
+        try {
+          pid = fs.readFileSync(pidFile, 'utf8').trim();
+        } catch {}
+        throw new Error(
+          `An old process(pid: ${pid}) is running, please check it. If you ensure the process is killed, please delete the lock file(${pidFile}), and then restart your application.`,
+        );
+      }
       throw new Error(
         `write lock file "${this.filename}.lock" error: ${e.code}`,
       );

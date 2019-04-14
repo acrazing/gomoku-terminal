@@ -4,6 +4,8 @@
  * @since 2019-04-12 16:02:42
  */
 
+(global as any).__DEV__ = process.env.NODE_ENV !== 'production';
+
 import { render } from 'ink';
 import { AsyncTrunk } from 'mobx-sync';
 import { createElement } from 'react';
@@ -33,11 +35,29 @@ const argv = yargs
   .help().argv as CommandLineArguments;
 
 async function gomoku() {
+  if (yargs.terminalWidth() < 20) {
+    console.warn(
+      'WARNING: your terminal size is less than 20 column, please resize your window.',
+    );
+  }
   const storage = new FSStorage(expandHomeDir(argv.store));
   storage.init();
-  process.on('exit', () => storage.destroy());
-  const signals: Signals[] = ['SIGINT', 'SIGABRT', 'SIGHUP'];
-  signals.forEach((signal) => process.on(signal, () => process.exit(0)));
+  process.on('exit', () => {
+    console.log('exiting...');
+    storage.destroy();
+  });
+  const signals: Signals[] = [
+    'SIGTERM',
+    'SIGHUP',
+    'SIGINT',
+    'SIGQUIT',
+    'SIGABRT',
+  ];
+  signals.forEach((signal) =>
+    process.on(signal, () => {
+      process.exit(0);
+    }),
+  );
   process.stdout.write('\u001bc');
   const store = {
     gomoku: new GomokuStore().inject(),

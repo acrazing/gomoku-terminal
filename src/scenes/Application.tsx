@@ -27,7 +27,12 @@ export class Application extends Component {
   render() {
     const Scene = scenes[Gomoku.path];
     return (
-      <Box>
+      <Box
+        height={20}
+        alignItems="center"
+        justifyContent="center"
+        flexDirection="column"
+      >
         <Scene />
       </Box>
     );

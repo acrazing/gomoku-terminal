@@ -3,6 +3,7 @@
  * @since 2019-04-12 16:18:50
  */
 
+import { observable } from 'mobx';
 import { ignore } from 'mobx-sync';
 import { Enum } from 'monofile-utilities/lib/enum';
 
@@ -17,7 +18,9 @@ export const Paths = Enum({
 export type Paths = Enum<typeof Paths>;
 
 export class GomokuStore {
-  @ignore path: Paths = Paths.Loading;
+  @ignore
+  @observable
+  path: Paths = Paths.Loading;
 
   inject() {
     return (Gomoku = this);
