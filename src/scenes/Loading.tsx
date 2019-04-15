@@ -13,7 +13,7 @@ import { userGetInfo } from '../utils/service/api';
 export class Loading extends PureComponent {
   async componentDidMount() {
     if (!User.userId) {
-      // Gomoku.path = 'Login';
+      Gomoku.path = 'Login';
       return;
     }
     try {

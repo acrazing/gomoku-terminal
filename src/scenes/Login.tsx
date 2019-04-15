@@ -3,13 +3,19 @@
  * @since 2019-04-12 16:04:48
  */
 
-import { Box, Color, Text } from 'ink';
+import { Box, Text } from 'ink';
 import InkTextInput from 'ink-text-input';
 import { memoize } from 'lodash';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react/custom';
 import * as React from 'react';
 import { Component } from 'react';
+import {
+  btnFocusProps,
+  Focusable,
+  FocusableContainer,
+  inputFocusProps,
+} from '../components/Focusable';
 
 @observer
 export class Login extends Component {
@@ -25,7 +31,7 @@ export class Login extends Component {
 
   render() {
     return (
-      <>
+      <FocusableContainer>
         <Text bold>Login</Text>
         <Box
           marginTop={1}
@@ -33,34 +39,52 @@ export class Login extends Component {
           alignItems="flex-start"
           flexDirection="column"
         >
-          <Box width={20}>
-            <Color underline>
-              <InkTextInput
-                placeholder="username            "
-                value={this.username}
-                onChange={this.handleChange('username')}
-                focus={false}
-              />
-            </Color>
-          </Box>
-          <Box>
-            <Color underline>
-              <InkTextInput
-                placeholder="password            "
-                value={this.password}
-                onChange={this.handleChange('password')}
-                mask="*"
-                focus={false}
-              />
-            </Color>
-          </Box>
+          <Focusable y={0} x={0} underline={true} focusProps={inputFocusProps}>
+            <InkTextInput
+              placeholder="username            "
+              value={this.username}
+              onChange={this.handleChange('username')}
+            />
+          </Focusable>
+          <Focusable y={1} x={0} underline={true} focusProps={inputFocusProps}>
+            <InkTextInput
+              placeholder="password            "
+              value={this.password}
+              onChange={this.handleChange('password')}
+              mask="*"
+            />
+          </Focusable>
         </Box>
         <Box flexDirection="row">
-          <Box margin={1}>Go</Box>
-          <Box margin={1}>Anonymous</Box>
-          <Box margin={1}>Exit</Box>
+          <Focusable
+            y={2}
+            x={-1}
+            margin={1}
+            underline
+            focusProps={btnFocusProps}
+          >
+            Anonymous
+          </Focusable>
+          <Focusable
+            y={2}
+            x={0}
+            margin={1}
+            underline
+            focusProps={btnFocusProps}
+          >
+            Go
+          </Focusable>
+          <Focusable
+            y={2}
+            x={1}
+            margin={1}
+            underline
+            focusProps={btnFocusProps}
+          >
+            Exit
+          </Focusable>
         </Box>
-      </>
+      </FocusableContainer>
     );
   }
 }

@@ -35,9 +35,9 @@ const argv = yargs
   .help().argv as CommandLineArguments;
 
 async function gomoku() {
-  if (yargs.terminalWidth() < 20) {
+  if (process.stdout.columns! < 20 || process.stdout.rows! < 20) {
     console.warn(
-      'WARNING: your terminal size is less than 20 column, please resize your window.',
+      'WARNING: your terminal size is less than 20 x 20, please resize your window.',
     );
   }
   const storage = new FSStorage(expandHomeDir(argv.store));
@@ -65,7 +65,7 @@ async function gomoku() {
   };
   const trunk = new AsyncTrunk(store, { storage, delay: 50 });
   await trunk.init();
-  const ink = render(createElement(Application));
+  const ink = render(createElement(Application), { debug: __DEV__ });
   await ink.waitUntilExit();
 }
 
