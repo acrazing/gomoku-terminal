@@ -3,7 +3,7 @@
  * @since 2019-04-12 16:56:28
  */
 
-import { Box } from 'ink';
+import { Box, Color } from 'ink';
 import { observer } from 'mobx-react/custom';
 import * as React from 'react';
 import { Component, ComponentClass } from 'react';
@@ -27,14 +27,17 @@ export class Application extends Component {
   render() {
     const Scene = scenes[Gomoku.path];
     return (
-      <Box
-        height={20}
-        alignItems="center"
-        justifyContent="center"
-        flexDirection="column"
-      >
-        <Scene />
-      </Box>
+      <>
+        <Box
+          height={20}
+          alignItems="center"
+          justifyContent="center"
+          flexDirection="column"
+        >
+          <Scene />
+        </Box>
+        <Color gray>Tips: use ← → ↑ ↓ to focus items.</Color>
+      </>
     );
   }
 }

@@ -4,7 +4,7 @@
  * @since 2019-04-12 16:02:42
  */
 
-(global as any).__DEV__ = process.env.NODE_ENV !== 'production';
+(global as any).__DEV__ = process.env.NODE_ENV === 'development';
 
 import { render } from 'ink';
 import { AsyncTrunk } from 'mobx-sync';
@@ -14,6 +14,7 @@ import { Application } from '../scenes/Application';
 import { GomokuStore } from '../store/GomokuStore';
 import { UserStore } from '../store/UserStore';
 import { FSStorage } from '../utils/misc/FSStorage';
+import { API } from '../utils/service/api';
 import Signals = NodeJS.Signals;
 
 const expandHomeDir = require('expand-home-dir');
@@ -26,7 +27,7 @@ interface CommandLineArguments extends Arguments {
 const argv = yargs
   .alias('help', 'h')
   .string('api')
-  .default('api', 'http:23.106.139.99:5001')
+  .default('api', 'http://23.106.139.99:5001')
   .describe('api', 'the api host')
   .string('store')
   .default('store', '~/.gomoku-terminal.json')
@@ -40,6 +41,7 @@ async function gomoku() {
       'WARNING: your terminal size is less than 20 x 20, please resize your window.',
     );
   }
+  API.config({ host: argv.api });
   const storage = new FSStorage(expandHomeDir(argv.store));
   storage.init();
   process.on('exit', () => {

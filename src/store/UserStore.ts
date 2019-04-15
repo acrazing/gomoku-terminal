@@ -3,10 +3,11 @@
  * @since 2019-04-12 16:18:33
  */
 
-import { computed, extendObservable, observable } from 'mobx';
+import { action, computed, observable, toJS } from 'mobx';
 import { ignore } from 'mobx-sync';
 import { noop, T_DAY } from 'monofile-utilities/lib/consts';
 import { UserGetOutput } from '../types/UserService.idl';
+import { API, UserLoginResponse } from '../utils/service/api';
 import Timer = NodeJS.Timer;
 
 export class UserStore {
@@ -23,6 +24,14 @@ export class UserStore {
     return this.users.get(this.userId);
   }
 
+  @action
+  login(doc: UserLoginResponse) {
+    this.userId = doc.user.id;
+    this.set(doc.user);
+    this.token = doc.token;
+    API.config({ token: doc.token });
+  }
+
   get(id: number) {
     return this.users.get(id);
   }
@@ -34,7 +43,7 @@ export class UserStore {
     const old = this.users.get(id);
     this.users.set(
       id,
-      old ? extendObservable(old, doc) : (doc as UserGetOutput),
+      Object.assign(old ? toJS(old) : ({} as UserGetOutput), doc),
     );
   }
 

@@ -53,6 +53,12 @@ export class FSStorage implements AsyncStorage {
   }
 
   async getItem(key: string): Promise<string | null> {
+    console.log(
+      'get: %s -> %s',
+      key,
+      this.data.hasOwnProperty(key),
+      this.data[key],
+    );
     if (!this.data.hasOwnProperty(key)) {
       return this.data[key];
     }

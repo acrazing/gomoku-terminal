@@ -8,7 +8,7 @@ import * as React from 'react';
 import { PureComponent } from 'react';
 import { Gomoku } from '../store/GomokuStore';
 import { User } from '../store/UserStore';
-import { userGetInfo } from '../utils/service/api';
+import { userGet } from '../utils/service/api';
 
 export class Loading extends PureComponent {
   async componentDidMount() {
@@ -17,7 +17,7 @@ export class Loading extends PureComponent {
       return;
     }
     try {
-      const user = await userGetInfo({});
+      const user = await userGet({});
       User.set(user);
       Gomoku.path = 'RoomList';
     } catch (e) {

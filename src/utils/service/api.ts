@@ -4,7 +4,7 @@
  */
 
 import Axios from 'axios';
-import { UserGetOutput } from '../../types/UserService.idl';
+import { PublicUserDocument, UserGetOutput } from '../../types/UserService.idl';
 import { ServiceError } from './ServiceError';
 
 const config = {
@@ -38,5 +38,43 @@ API.config = (options: Partial<typeof config>) => {
   Object.assign(config, options);
 };
 
-export const userLogin = API('/user/login');
-export const userGetInfo = API<{ id?: number }, UserGetOutput>('/user/getInfo');
+export interface UserLoginRequest {
+  kind: 'username' | 'email' | 'mobile';
+  username: string;
+  email: string;
+  mobile: string;
+  password: string;
+  withToken?: boolean;
+  anonymous: boolean;
+}
+
+export type UserLoginResponse = {
+  user: UserGetOutput;
+  token: string;
+};
+
+export const userLogin = API<UserLoginRequest, UserLoginResponse>(
+  '/user.login',
+);
+
+export interface UserGetRequest {
+  id?: string;
+}
+
+export type UserGetResponse = UserGetOutput;
+
+export const userGet = API<UserGetRequest, UserGetResponse>('/user.get');
+
+export interface UserRegisterRequest {
+  username: string;
+  mobile: string;
+  email: string;
+  password: string;
+  nickname: string;
+}
+
+export type UserRegisterResponse = PublicUserDocument;
+
+export const userRegister = API<UserRegisterRequest, UserRegisterResponse>(
+  '/user.register',
+);

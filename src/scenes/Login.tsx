@@ -3,7 +3,7 @@
  * @since 2019-04-12 16:04:48
  */
 
-import { Box, Text } from 'ink';
+import { Box, Color, Text } from 'ink';
 import InkTextInput from 'ink-text-input';
 import { memoize } from 'lodash';
 import { observable } from 'mobx';
@@ -16,6 +16,11 @@ import {
   FocusableContainer,
   inputFocusProps,
 } from '../components/Focusable';
+import { KeyboardReceiver } from '../components/KeyboardReceiver';
+import { Gomoku, Paths } from '../store/GomokuStore';
+import { User } from '../store/UserStore';
+import { userLogin, userRegister } from '../utils/service/api';
+import { ServiceError } from '../utils/service/ServiceError';
 
 @observer
 export class Login extends Component {
@@ -23,11 +28,86 @@ export class Login extends Component {
   private username = '';
   @observable
   private password = '';
+  @observable error = '';
   private handleChange = memoize(
     (key: 'username' | 'password') => (value: string) => {
+      if (value.length > 20) {
+        return;
+      }
       this[key] = value;
     },
   );
+
+  private loading = false;
+
+  private handleAnonymous = async () => {
+    if (this.loading) {
+      return;
+    }
+    this.loading = true;
+    try {
+      const doc = await userLogin({
+        kind: 'username',
+        username: '',
+        mobile: '',
+        email: '',
+        password: '',
+        withToken: true,
+        anonymous: true,
+      });
+      User.login(doc);
+      Gomoku.path = Paths.RoomList;
+    } catch (e) {
+      this.error = e.message || e + '';
+    }
+    this.loading = false;
+  };
+
+  private handleLogin = async () => {
+    if (this.loading) {
+      return;
+    }
+    if (this.username.length < 6 || this.password.length < 6) {
+      this.error = 'Please input username & password, both min length is 6.';
+    }
+    this.loading = false;
+    try {
+      const doc = await userLogin({
+        kind: 'username',
+        username: this.username,
+        password: this.password,
+        mobile: '',
+        email: '',
+        withToken: true,
+        anonymous: false,
+      });
+      User.login(doc);
+      Gomoku.path = Paths.RoomList;
+    } catch (e) {
+      if (e instanceof ServiceError && e.code === 404) {
+        this.loading = false;
+        try {
+          await userRegister({
+            username: this.username,
+            mobile: '',
+            email: '',
+            password: this.password,
+            nickname: this.username,
+          });
+          await this.handleLogin();
+        } catch (e) {
+          this.error = e.message || e + '';
+        }
+      } else {
+        this.error = e.message || e + '';
+      }
+    }
+    this.loading = false;
+  };
+
+  private handleExit = () => {
+    process.exit(0);
+  };
 
   render() {
     return (
@@ -63,7 +143,9 @@ export class Login extends Component {
             underline
             focusProps={btnFocusProps}
           >
-            Anonymous
+            <KeyboardReceiver onEnter={this.handleAnonymous}>
+              Anonymous
+            </KeyboardReceiver>
           </Focusable>
           <Focusable
             y={2}
@@ -72,7 +154,7 @@ export class Login extends Component {
             underline
             focusProps={btnFocusProps}
           >
-            Go
+            <KeyboardReceiver onEnter={this.handleLogin}>Go</KeyboardReceiver>
           </Focusable>
           <Focusable
             y={2}
@@ -81,9 +163,12 @@ export class Login extends Component {
             underline
             focusProps={btnFocusProps}
           >
-            Exit
+            <KeyboardReceiver onEnter={this.handleExit}>Exit</KeyboardReceiver>
           </Focusable>
         </Box>
+        <Color red={!this.loading} cyan={this.loading}>
+          <Text>{this.loading ? 'Login...' : this.error || ' '}</Text>
+        </Color>
       </FocusableContainer>
     );
   }
