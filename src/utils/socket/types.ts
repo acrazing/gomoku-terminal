@@ -3,6 +3,8 @@
  * @since 2019-03-26 11:18:57
  */
 
+import { IncomingHttpHeaders } from 'http';
+
 export enum SocketEvents {
   // 服务器发给客户端
   Ready = 'socket/ready',
@@ -27,5 +29,18 @@ export interface ConnectEvent {
 
 export interface ReadyEvent {
   id: string;
+  userId: number;
+}
+
+export interface SocketUserDocument {
+  id: number;
+  offline: boolean;
+}
+
+export interface ClientDocument {
+  id: string;
+  ip: string;
+  url: string;
+  headers: IncomingHttpHeaders;
   userId: number;
 }

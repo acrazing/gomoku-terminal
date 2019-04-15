@@ -36,7 +36,7 @@ export class Application extends Component {
         >
           <Scene />
         </Box>
-        <Color gray>Tips: use ← → ↑ ↓ to focus items.</Color>
+        <Color gray>Tips: use ↤ ↦ ↥ ↧ to focus items.</Color>
       </>
     );
   }
