@@ -90,14 +90,30 @@ export interface RoomEnterEvent {
   // null: 创建
   // undefined: 随机, 没有就创建
   // number: 指定
-  roomId?: number | null;
+  roomId?: number | null | undefined;
   // null: 旁观
   // undefined: 随机
   // number: 指定
-  seat?: number | null;
+  seat?: number | null | undefined;
   // undefined: 随机
   // number: 指定
-  prefabId?: number;
+  prefabId?: number | undefined;
+}
+
+export interface RoomPrefabMetadata<P extends RoomPrefab = RoomPrefab> {
+  prefab: RoomPrefab;
+  count: number;
+  freeCount: number;
+  busyCount: number;
+}
+
+export interface RoomListEvent {
+  prefabId: number;
+}
+
+export interface RoomListData<R> {
+  rooms: R[];
+  count: number;
 }
 
 export const RoomEvents = createTypeTree('room', {

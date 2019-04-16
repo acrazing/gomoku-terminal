@@ -9,6 +9,7 @@ import { observer } from 'mobx-react/custom';
 import { ANY } from 'monofile-utilities/lib/consts';
 import * as React from 'react';
 import { Component, PureComponent } from 'react';
+import { F1 } from '../types/misc';
 import { seek } from '../utils/misc/array';
 import ReadStream = NodeJS.ReadStream;
 
@@ -105,7 +106,9 @@ export interface FocusableProps
   focusProps?: Partial<ColorProps & BoxProps>;
 }
 
-export const inputFocusProps: Partial<ColorProps & BoxProps> = { bgCyan: true };
+export const inputFocusProps: Partial<ColorProps & BoxProps> = {
+  bgMagenta: true,
+};
 export const btnFocusProps: Partial<ColorProps & BoxProps> = { bgBlue: true };
 
 @observer
@@ -132,8 +135,8 @@ export class Focusable extends Component<FocusableProps> {
   render() {
     const focusProps = state.current === this ? this.props.focusProps : void 0;
     return (
-      <Box {...this.props} {...focusProps}>
-        <Color {...this.props} {...focusProps}>
+      <Color {...this.props} {...focusProps}>
+        <Box {...this.props} {...focusProps}>
           {React.Children.map(this.props.children, (child) => {
             return React.isValidElement(child)
               ? React.cloneElement<any>(child, {
@@ -142,14 +145,15 @@ export class Focusable extends Component<FocusableProps> {
                 })
               : child;
           })}
-        </Color>
-      </Box>
+        </Box>
+      </Color>
     );
   }
 }
 
 export class FocusableContainer extends PureComponent {
   private stdin: ReadStream = ANY;
+  private setRawMode: F1<boolean> | undefined = void 0;
 
   private left(): FocusablePosition | undefined {
     if (!state.current) {
@@ -276,6 +280,7 @@ export class FocusableContainer extends PureComponent {
 
   componentDidMount(): void {
     state.container = this;
+    this.setRawMode && this.setRawMode(true);
     this.stdin.on('data', this.handleInput);
   }
 
@@ -283,14 +288,16 @@ export class FocusableContainer extends PureComponent {
     if (state.container === this) {
       state.container = ANY;
     }
+    this.setRawMode && this.setRawMode(false);
     this.stdin.removeListener('data', this.handleInput);
   }
 
   render() {
     return (
       <StdinContext.Consumer>
-        {({ stdin }) => {
+        {({ stdin, setRawMode }) => {
           this.stdin = this.stdin || stdin;
+          this.setRawMode = setRawMode;
           return this.props.children;
         }}
       </StdinContext.Consumer>

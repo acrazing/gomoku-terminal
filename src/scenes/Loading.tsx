@@ -22,7 +22,6 @@ export class Loading extends PureComponent {
       await Gomoku.initSocket();
       Gomoku.path = 'RoomList';
     } catch (e) {
-      console.error(e);
       Gomoku.path = 'Login';
     }
   }

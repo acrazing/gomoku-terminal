@@ -37,9 +37,9 @@ const argv = yargs
   .help().argv as CommandLineArguments;
 
 async function gomoku() {
-  if (process.stdout.columns! < 20 || process.stdout.rows! < 20) {
+  if (process.stdout.columns! < 40 || process.stdout.rows! < 20) {
     console.warn(
-      'WARNING: your terminal size is less than 20 x 20, please resize your window.',
+      'WARNING: your terminal size is less than 40(w) x 20(h), please resize your window.',
     );
   }
   API.config({ host: argv.api });

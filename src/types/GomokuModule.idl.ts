@@ -41,7 +41,9 @@ export interface GomokuOnlineGameDocument {
 }
 
 export interface GomokuRoomDocument
-  extends RoomDocument<GomokuRoomUserDocument> {}
+  extends RoomDocument<GomokuRoomUserDocument> {
+  game: GomokuOnlineGameDocument;
+}
 
 export interface GomokuStartEvent extends GomokuOnlineGameDocument {}
 
