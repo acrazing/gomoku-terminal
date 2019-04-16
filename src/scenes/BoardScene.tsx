@@ -3,14 +3,21 @@
  * @since 2019-04-12 16:04:48
  */
 
-import { Box } from 'ink';
+import { Box, Color } from 'ink';
 import { memoize } from 'lodash';
-import { observable } from 'mobx';
+import { computed, observable } from 'mobx';
 import { observer } from 'mobx-react/custom';
 import * as React from 'react';
 import { Component } from 'react';
-import { Focusable, FocusableContainer } from '../components/Focusable';
+import {
+  btnFocusProps,
+  Focusable,
+  FocusableContainer,
+  inputFocusProps,
+} from '../components/Focusable';
 import { KeyboardReceiver } from '../components/KeyboardReceiver';
+import { Gomoku } from '../store/GomokuStore';
+import { User } from '../store/UserStore';
 import { Board } from '../utils/game/board_put';
 import { Piece } from '../utils/game/GomokuMachine';
 import { itos } from '../utils/misc/numberFormat';
@@ -31,7 +38,9 @@ export class BoardScene extends Component {
   private board = new Board(15, 15, Piece.Empty);
 
   private handlePress = (key: string) => {
-    console.log(this.board, chars);
+    if (0) {
+      console.log(this.board, chars, this.me, this.it, key);
+    }
   };
 
   private handlePlay = memoize(
@@ -41,24 +50,47 @@ export class BoardScene extends Component {
     (x, y) => x + '-' + y,
   );
 
+  @computed
+  private get me() {
+    return Gomoku.room
+      ? Gomoku.room.players[0] && Gomoku.room.players[0]!.id === User.userId
+        ? Gomoku.room.players[0]
+        : Gomoku.room.players[1]
+      : null;
+  }
+
+  @computed
+  private get it() {
+    return Gomoku.room
+      ? Gomoku.room.players[0]
+        ? Gomoku.room.players[0]!.id === User.userId
+          ? Gomoku.room.players[1]
+          : Gomoku.room.players[0]
+        : null
+      : null;
+  }
+
+  private id = 0;
+
   render() {
+    console.log('render', this.id++);
     return (
       <FocusableContainer>
-        <Box width={40} flexDirection="row">
+        <Box width={51} flexDirection="row">
           <KeyboardReceiver keys={this.keys} onPress={this.handlePress} focus />
           <Box width={10}>Opponent</Box>
           <Box width={31} flexDirection="column">
-            <Box>{'  ' + this.labels.join(' ')}</Box>
+            <Color gray>{'  ' + this.labels.join(' ')}</Color>
             {my.map((y) => {
               return (
-                <Box key={y} flexDirection="column">
-                  <Box>{itos(y)}</Box>
+                <Box key={y} flexDirection="row">
+                  <Color gray>{itos(y)}</Color>
                   {mx.map((x) => (
-                    <Box flexDirection="row" key={x}>
-                      <Box> </Box>
-                      <Focusable y={y} x={x}>
+                    <Box key={x}>
+                      {' '}
+                      <Focusable y={y} x={x} focusProps={inputFocusProps}>
                         <KeyboardReceiver onEnter={this.handlePlay(x, y)}>
-                          {`${y}-${x}`}
+                          {chars.charAt(this.board.get(x, y))}
                         </KeyboardReceiver>
                       </Focusable>
                     </Box>
@@ -67,13 +99,31 @@ export class BoardScene extends Component {
               );
             })}
             <Box>
-              <Focusable y={16} x={0} margin={1}>
+              <Focusable
+                y={16}
+                x={0}
+                margin={1}
+                underline
+                focusProps={btnFocusProps}
+              >
                 <KeyboardReceiver>Exit(E)</KeyboardReceiver>
               </Focusable>
-              <Focusable y={16} x={1} margin={1}>
-                <KeyboardReceiver>Ready(E)</KeyboardReceiver>
+              <Focusable
+                y={16}
+                x={1}
+                margin={1}
+                underline
+                focusProps={btnFocusProps}
+              >
+                <KeyboardReceiver>Ready(R)</KeyboardReceiver>
               </Focusable>
-              <Focusable y={16} x={2} margin={1}>
+              <Focusable
+                y={16}
+                x={2}
+                margin={1}
+                underline
+                focusProps={btnFocusProps}
+              >
                 <KeyboardReceiver>Give Up(Q)</KeyboardReceiver>
               </Focusable>
             </Box>

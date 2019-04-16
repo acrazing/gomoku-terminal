@@ -5,7 +5,6 @@
 
 import { observable, when } from 'mobx';
 import { asyncAction } from 'mobx-async-action';
-import { ignore } from 'mobx-sync';
 import { ANY } from 'monofile-utilities/lib/consts';
 import { Enum } from 'monofile-utilities/lib/enum';
 import { appendQuery } from 'monofile-utilities/lib/query-string';
@@ -31,22 +30,19 @@ export const Paths = Enum({
 export type Paths = Enum<typeof Paths>;
 
 export class GomokuStore {
-  @ignore
   @observable
   path: Paths = Paths.Loading;
-
   socket!: SocketClient;
-
   rooms = observable.array<GomokuRoomDocument>();
-
-  @observable meta: RoomPrefabMetadata<GomokuPrefabDocument> = {
+  @observable
+  meta: RoomPrefabMetadata<GomokuPrefabDocument> = {
     prefab: ANY,
     count: 0,
     freeCount: 0,
     busyCount: 0,
   };
-
-  @observable room: GomokuRoomDocument | undefined = undefined;
+  @observable.shallow
+  room: GomokuRoomDocument | undefined = undefined;
 
   async initSocket() {
     const token = await gomokuGetAccessToken({});

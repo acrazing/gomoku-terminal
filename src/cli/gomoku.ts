@@ -62,13 +62,11 @@ async function gomoku() {
     }),
   );
   process.stdout.write('\u001bc');
-  const store = {
-    gomoku: new GomokuStore().inject(),
-    user: new UserStore().inject(),
-  };
-  const trunk = new AsyncTrunk(store, { storage, delay: 50 });
+  new GomokuStore().inject();
+  const user = new UserStore().inject();
+  const trunk = new AsyncTrunk({ user }, { storage, delay: 50 });
   await trunk.init();
-  const ink = render(createElement(Application), { debug: __DEV__ });
+  const ink = render(createElement(Application), { debug: false });
   await ink.waitUntilExit();
 }
 

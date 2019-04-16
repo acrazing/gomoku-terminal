@@ -11,6 +11,7 @@ import * as React from 'react';
 import { Component, PureComponent } from 'react';
 import { F1 } from '../types/misc';
 import { seek } from '../utils/misc/array';
+import { debug } from '../utils/misc/log';
 import ReadStream = NodeJS.ReadStream;
 
 class FocusableStore {
@@ -252,6 +253,7 @@ export class FocusableContainer extends PureComponent {
   }
 
   private handleInput = (data: Buffer) => {
+    debug('input', data.toString(), this.stdin.listenerCount('data'));
     if (state.ys.length === 0) {
       return;
     }
@@ -272,6 +274,7 @@ export class FocusableContainer extends PureComponent {
       default:
         return;
     }
+    debug('pos', pos);
     if (!pos) {
       return;
     }
@@ -281,6 +284,7 @@ export class FocusableContainer extends PureComponent {
   componentDidMount(): void {
     state.container = this;
     this.setRawMode && this.setRawMode(true);
+    this.stdin.setMaxListeners(1000);
     this.stdin.on('data', this.handleInput);
   }
 
