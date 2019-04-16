@@ -12,13 +12,7 @@ import {
 import { GomokuPlayEvent } from '../../types/GomokuModule.idl';
 import { GomokuGameDocument, GomokuRole } from '../../types/GomokuService.idl';
 import { ServiceError } from '../service/ServiceError';
-import {
-  Board,
-  BoardCoord,
-  boardDecodeRecord,
-  BoardHand,
-  boardInit,
-} from './board_put';
+import { Board, BoardCoord, boardDecodeRecord, BoardHand } from './board_put';
 
 export enum Piece {
   Empty = 0,
@@ -30,7 +24,7 @@ const BOARD_SIZE = 15;
 
 export class GomokuMachine {
   readonly id: number;
-  readonly board: Board<Piece>;
+  readonly board: Board<Piece, Uint8Array>;
   readonly history: BoardHand[];
   winner: GomokuRole | null;
   winnerLocation: [BoardCoord, BoardCoord] | null;
@@ -41,7 +35,7 @@ export class GomokuMachine {
     this.createdAt = dayjs(game.createdAt).valueOf();
     this.winner = null;
     this.winnerLocation = null;
-    this.board = boardInit(BOARD_SIZE, BOARD_SIZE, Piece.Empty);
+    this.board = new Board(15, 15, Piece.Empty);
     this.history = boardDecodeRecord(game.record || '');
   }
 
@@ -62,12 +56,15 @@ export class GomokuMachine {
     let ok = true;
     // 0
     for (i = 1; i < 5; i++) {
-      if (x + i >= BOARD_SIZE || this.board[y][x + i] !== this.board[y][x]) {
+      if (
+        x + i >= BOARD_SIZE ||
+        this.board.get(x + i, y) !== this.board.get(x, y)
+      ) {
         break;
       }
     }
     for (j = 5 - i; j > 0; j--) {
-      if (x - j < 0 || this.board[y][x - j] !== this.board[y][x]) {
+      if (x - j < 0 || this.board.get(x - j, y) !== this.board.get(x, y)) {
         ok = false;
         break;
       }
@@ -83,7 +80,7 @@ export class GomokuMachine {
       if (
         y - i < 0 ||
         x + i >= BOARD_SIZE ||
-        this.board[y - i][x + i] !== this.board[y][x]
+        this.board.get(x + i, y - i) !== this.board.get(x, y)
       ) {
         break;
       }
@@ -92,7 +89,7 @@ export class GomokuMachine {
       if (
         y + j >= BOARD_SIZE ||
         x - j < 0 ||
-        this.board[y + j][x - j] !== this.board[y][x]
+        this.board.get(x - j, y + j) !== this.board.get(x, y)
       ) {
         ok = false;
         break;
@@ -106,12 +103,15 @@ export class GomokuMachine {
     ok = true;
     // 90
     for (i = 1; i < 5; i++) {
-      if (y - i < 0 || this.board[y - i][x] !== this.board[y][x]) {
+      if (y - i < 0 || this.board.get(x, y - i) !== this.board.get(x, y)) {
         break;
       }
     }
     for (j = 5 - i; j > 0; j--) {
-      if (y + j >= BOARD_SIZE || this.board[y + j][x] !== this.board[y][x]) {
+      if (
+        y + j >= BOARD_SIZE ||
+        this.board.get(x, y + j) !== this.board.get(x, y)
+      ) {
         ok = false;
         break;
       }
@@ -127,7 +127,7 @@ export class GomokuMachine {
       if (
         y - i < 0 ||
         x - i < 0 ||
-        this.board[y - i][x - i] !== this.board[y][x]
+        this.board.get(x - i, y - i) !== this.board.get(x, y)
       ) {
         break;
       }
@@ -136,7 +136,7 @@ export class GomokuMachine {
       if (
         y + j >= BOARD_SIZE ||
         x + j >= BOARD_SIZE ||
-        this.board[y + j][x + j] !== this.board[y][x]
+        this.board.get(x + j, y + j) !== this.board.get(x, y)
       ) {
         ok = false;
         break;
@@ -162,10 +162,10 @@ export class GomokuMachine {
       throw new ServiceError(InvalidUserRound);
     }
     const [x, y] = event.location;
-    if (!this.board[y] || this.board[y][x] !== Piece.Empty) {
+    if (this.board.get(x, y) !== Piece.Empty) {
       throw new ServiceError(InvalidBoardLocation);
     }
-    this.board[y][x] = this.history.length % 2 ? Piece.White : Piece.Black;
+    this.board.set(x, y, this.history.length % 2 ? Piece.White : Piece.Black);
     const hand: BoardHand = { x, y, t: Date.now() - this.createdAt };
     this.history.push(hand);
     this.computeWinner();

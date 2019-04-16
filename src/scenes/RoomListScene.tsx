@@ -21,7 +21,7 @@ import { GomokuRoomDocument } from '../types/GomokuModule.idl';
 import { itos } from '../utils/misc/numberFormat';
 
 @observer
-export class RoomList extends Component {
+export class RoomListScene extends Component {
   private refreshTimer!: any;
   @observable private error = '';
   @observable private loading = false;
@@ -136,7 +136,7 @@ export class RoomList extends Component {
             red={!!this.error && !this.loading}
           >
             {this.loading
-              ? 'Loading...'
+              ? 'LoadingScene...'
               : this.error
               ? this.error
               : 'Press R to refresh room list.'}

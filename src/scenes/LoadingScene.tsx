@@ -10,7 +10,7 @@ import { Gomoku } from '../store/GomokuStore';
 import { User } from '../store/UserStore';
 import { userGet } from '../utils/service/api';
 
-export class Loading extends PureComponent {
+export class LoadingScene extends PureComponent {
   async componentDidMount() {
     if (!User.userId) {
       Gomoku.path = 'Login';

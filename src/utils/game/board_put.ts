@@ -10,41 +10,62 @@
 // 左上为 (0, 0)
 // 右下为 (width, height)
 import { itos, stoi } from '../misc/numberFormat';
+import TypedArray = NodeJS.TypedArray;
 
-export type Board<T extends number> = T[][];
+export class Board<T extends number, B extends TypedArray> {
+  readonly data: B;
 
-export type BoardCoord = [number, number];
-
-export function boardInit<T extends number>(
-  width: number,
-  height: number,
-  initial: T,
-): Board<T> {
-  const board: T[][] = [];
-  for (let y = 0; y < height; y++) {
-    board.push(new Array(width).fill(initial));
+  constructor(
+    readonly width: number,
+    readonly height: number,
+    initial: T,
+    readonly Factory: new (n: number) => B = Int8Array as any,
+  ) {
+    this.data = new Factory(width * height);
+    this.data.fill(initial);
   }
-  return board;
-}
 
-export function boardDisplay(board: number[][], chars = '⋅•◦') {
-  return [
-    '  ' +
-      Array(board[0].length)
+  get(x: number, y: number) {
+    return this.data[y * this.width + x] as T;
+  }
+
+  set(x: number, y: number, value: T) {
+    this.data[y * this.width + x] = value;
+  }
+
+  row(y: number) {
+    return this.data.slice(y * this.width, (y + 1) * this.width);
+  }
+
+  col(x: number) {
+    const col = new this.Factory(this.height);
+    for (let i = 0; i < this.height; i++) {
+      col[i] = this.get(x, i);
+    }
+    return col;
+  }
+
+  display(chars = '⋅•◦') {
+    let str =
+      '  ' +
+      Array(this.width)
         .fill(0)
         .map((_, index) => itos(index))
-        .join(' '),
-  ]
-    .concat(
-      board.map(
-        (row, index) =>
-          itos(index) +
-          ' ' +
-          row.map((value) => chars.charAt(value) || itos(value)).join(' '),
-      ),
-    )
-    .join('\n');
+        .join(' ') +
+      '\n';
+    for (let y = 0; y < this.height; y++) {
+      str += itos(y);
+      for (let x = 0; x < this.width; x++) {
+        const value = this.get(x, y);
+        str += ' ' + chars.charAt(value) || itos(value);
+      }
+      str += '\n';
+    }
+    return str;
+  }
 }
+
+export type BoardCoord = [number, number];
 
 export interface BoardHand {
   x: number;

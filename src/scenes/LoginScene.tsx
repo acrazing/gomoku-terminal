@@ -23,7 +23,7 @@ import { userLogin, userRegister } from '../utils/service/api';
 import { ServiceError } from '../utils/service/ServiceError';
 
 @observer
-export class Login extends Component {
+export class LoginScene extends Component {
   @observable
   private username = '';
   @observable
@@ -169,7 +169,7 @@ export class Login extends Component {
           </Focusable>
         </Box>
         <Color red={!this.loading} cyan={this.loading}>
-          <Text>{this.loading ? 'Login...' : this.error || ' '}</Text>
+          <Text>{this.loading ? 'LoginScene...' : this.error || ' '}</Text>
         </Color>
       </FocusableContainer>
     );

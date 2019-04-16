@@ -7,7 +7,7 @@ import { Box, Text } from 'ink';
 import * as React from 'react';
 import { PureComponent } from 'react';
 
-export class Profile extends PureComponent {
+export class ProfileScene extends PureComponent {
   render() {
     return (
       <Box>

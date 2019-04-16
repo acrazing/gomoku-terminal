@@ -8,18 +8,18 @@ import { observer } from 'mobx-react/custom';
 import * as React from 'react';
 import { Component, ComponentClass } from 'react';
 import { Gomoku, Paths } from '../store/GomokuStore';
-import { Board } from './Board';
-import { Loading } from './Loading';
-import { Login } from './Login';
-import { Profile } from './Profile';
-import { RoomList } from './RoomList';
+import { BoardScene } from './BoardScene';
+import { LoadingScene } from './LoadingScene';
+import { LoginScene } from './LoginScene';
+import { ProfileScene } from './ProfileScene';
+import { RoomListScene } from './RoomListScene';
 
 const scenes: { [P in Paths]: ComponentClass<any> } = {
-  [Paths.Board]: Board,
-  [Paths.Profile]: Profile,
-  [Paths.RoomList]: RoomList,
-  [Paths.Login]: Login,
-  [Paths.Loading]: Loading,
+  [Paths.Board]: BoardScene,
+  [Paths.Profile]: ProfileScene,
+  [Paths.RoomList]: RoomListScene,
+  [Paths.Login]: LoginScene,
+  [Paths.Loading]: LoadingScene,
 };
 
 @observer
