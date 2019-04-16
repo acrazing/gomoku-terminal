@@ -128,10 +128,10 @@ export class SocketClient extends TinyEmitter {
       return;
     }
     if (this.connectTimeout) {
-      this.readyTimer = window.setTimeout(() => {
+      this.readyTimer = setTimeout(() => {
         this.destroy();
         this.open('ready timeout');
-      }, this.connectTimeout);
+      }, this.connectTimeout) as any;
     }
     this.ws.onerror = (ev) => this.reconnect({ type: ev.type });
     this.ws.onclose = (ev) => {

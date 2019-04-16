@@ -5,6 +5,7 @@
  */
 
 (global as any).__DEV__ = process.env.NODE_ENV === 'development';
+(global as any).WebSocket = require('ws');
 
 import { render } from 'ink';
 import { AsyncTrunk } from 'mobx-sync';

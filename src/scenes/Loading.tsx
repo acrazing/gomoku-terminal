@@ -19,8 +19,10 @@ export class Loading extends PureComponent {
     try {
       const user = await userGet({});
       User.set(user);
+      await Gomoku.initSocket();
       Gomoku.path = 'RoomList';
     } catch (e) {
+      console.error(e);
       Gomoku.path = 'Login';
     }
   }
@@ -28,7 +30,7 @@ export class Loading extends PureComponent {
   render() {
     return (
       <Box>
-        <Text>Loading...</Text>
+        <Text bold>Loading...</Text>
       </Box>
     );
   }

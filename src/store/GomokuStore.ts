@@ -3,9 +3,13 @@
  * @since 2019-04-12 16:18:50
  */
 
-import { observable } from 'mobx';
+import { observable, when } from 'mobx';
 import { ignore } from 'mobx-sync';
 import { Enum } from 'monofile-utilities/lib/enum';
+import { appendQuery } from 'monofile-utilities/lib/query-string';
+import { GomokuRoomDocument } from '../types/GomokuModule.idl';
+import { gomokuGetAccessToken } from '../utils/service/api';
+import { SocketClient } from '../utils/socket/SocketClient';
 
 export const Paths = Enum({
   Loading: '',
@@ -21,6 +25,19 @@ export class GomokuStore {
   @ignore
   @observable
   path: Paths = Paths.Loading;
+
+  socket!: SocketClient;
+
+  rooms = observable.array<GomokuRoomDocument>();
+
+  async initSocket() {
+    const token = await gomokuGetAccessToken({});
+    this.socket = new SocketClient({
+      url: appendQuery(token.address, { token: token.token }),
+    });
+    this.socket.connect();
+    await when(() => this.socket.status === 'connected');
+  }
 
   inject() {
     return (Gomoku = this);

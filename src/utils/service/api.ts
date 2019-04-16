@@ -7,6 +7,8 @@ import Axios from 'axios';
 import { PublicUserDocument, UserGetOutput } from '../../types/UserService.idl';
 import { ServiceError } from './ServiceError';
 
+const packageJson = require('../../../package.json');
+
 const config = {
   host: '',
   token: '',
@@ -20,6 +22,7 @@ export function API(api: string) {
       validateStatus: () => true,
       headers: {
         Authorization: config.token,
+        'User-Agent': `Kcats gomoku-terminal/${packageJson.version}`,
       },
     }).then(
       (r) => {
@@ -78,3 +81,17 @@ export type UserRegisterResponse = PublicUserDocument;
 export const userRegister = API<UserRegisterRequest, UserRegisterResponse>(
   '/user.register',
 );
+
+export interface GomokuGetAccessTokenRequest {}
+
+export interface GomokuGetAccessTokenResponse {
+  token: string;
+  address: string;
+  resource: string;
+  expiresAt: string;
+}
+
+export const gomokuGetAccessToken = API<
+  GomokuGetAccessTokenRequest,
+  GomokuGetAccessTokenResponse
+>('/gomoku.getAccessToken');

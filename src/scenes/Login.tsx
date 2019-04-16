@@ -56,6 +56,7 @@ export class Login extends Component {
         anonymous: true,
       });
       User.login(doc);
+      await Gomoku.initSocket();
       Gomoku.path = Paths.RoomList;
     } catch (e) {
       this.error = e.message || e + '';
@@ -82,6 +83,7 @@ export class Login extends Component {
         anonymous: false,
       });
       User.login(doc);
+      await Gomoku.initSocket();
       Gomoku.path = Paths.RoomList;
     } catch (e) {
       if (e instanceof ServiceError && e.code === 404) {
