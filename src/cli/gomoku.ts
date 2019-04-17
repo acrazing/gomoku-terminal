@@ -17,7 +17,6 @@ import { Application } from '../scenes/Application';
 import { GomokuStore } from '../store/GomokuStore';
 import { UserStore } from '../store/UserStore';
 import { FSStorage } from '../utils/misc/FSStorage';
-import { debug } from '../utils/misc/log';
 import { API } from '../utils/service/api';
 import Signals = NodeJS.Signals;
 
@@ -65,15 +64,6 @@ async function gomoku() {
     }),
   );
   process.stdout.write('\u001bc');
-  if (__DEV__) {
-    process.stdin.on('data', (buf: Buffer) => {
-      debug(
-        'stdin',
-        buf.toString(),
-        process.stdin.listeners('data').map(String),
-      );
-    });
-  }
   new GomokuStore().inject();
   const user = new UserStore().inject();
   const trunk = new AsyncTrunk({ user }, { storage, delay: 50 });

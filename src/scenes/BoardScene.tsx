@@ -70,10 +70,7 @@ export class BoardScene extends Component {
       : null;
   }
 
-  private id = 0;
-
   render() {
-    console.log('render', this.id++);
     return (
       <FocusableContainer>
         <Box width={51} flexDirection="row">

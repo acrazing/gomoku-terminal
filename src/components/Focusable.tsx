@@ -5,21 +5,17 @@
 
 import { Box, BoxProps, Color, ColorProps, StdinContext } from 'ink';
 import { action, computed, observable, ObservableMap, runInAction } from 'mobx';
-import { observer } from 'mobx-react/custom';
 import { ANY } from 'monofile-utilities/lib/consts';
 import * as React from 'react';
-import { Component, PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { F1 } from '../types/misc';
 import { seek } from '../utils/misc/array';
-import { debug } from '../utils/misc/log';
 import ReadStream = NodeJS.ReadStream;
 
 class FocusableStore {
   @observable container: FocusableContainer | undefined = undefined;
-  @observable x = NaN;
-  @observable y = NaN;
-  private items = observable.map<number, ObservableMap<number, number>>();
-  uid = 0;
+  @observable current: Focusable | undefined = undefined;
+  private items = observable.map<number, ObservableMap<number, Focusable>>();
 
   get(x: number, y: number) {
     const row = this.items.get(y);
@@ -35,19 +31,19 @@ class FocusableStore {
     if (!this.items.has(item.props.y)) {
       this.items.set(item.props.y, observable.map({}, { deep: false }));
     }
-    this.items.get(item.props.y)!.set(item.props.x, item.id);
+    this.items.get(item.props.y)!.set(item.props.x, item);
   }
 
   @action
   drop(item: Focusable) {
-    if (this.x === item.props.x && this.y === item.props.y) {
-      this.x = this.y = NaN;
+    if (this.current === item) {
+      this.current = undefined;
     }
     if (!this.items.has(item.props.y)) {
       return;
     }
     const row = this.items.get(item.props.y)!;
-    if (row.get(item.props.x) === item.id) {
+    if (row.get(item.props.x) === item) {
       row.delete(item.props.x);
     }
   }
@@ -111,14 +107,17 @@ export interface FocusableProps
   focusProps?: Partial<ColorProps & BoxProps>;
 }
 
+export interface FocusableState {
+  focused: boolean;
+}
+
 export const inputFocusProps: Partial<ColorProps & BoxProps> = {
   bgMagenta: true,
 };
 export const btnFocusProps: Partial<ColorProps & BoxProps> = { bgBlue: true };
 
-@observer
-export class Focusable extends Component<FocusableProps> {
-  readonly id = state.uid++;
+export class Focusable extends PureComponent<FocusableProps, FocusableState> {
+  state: FocusableState = { focused: false };
 
   componentWillReceiveProps(
     nextProps: Readonly<FocusableProps>,
@@ -140,16 +139,7 @@ export class Focusable extends Component<FocusableProps> {
   }
 
   render() {
-    debug(
-      'focusable render id: %d, cx: %d, cy: %d, x: %d, y: %d, children: %O',
-      this.id,
-      state.x,
-      state.y,
-      this.props.x,
-      this.props.y,
-    );
-    const focus = state.x === this.props.x && state.y === this.props.y;
-    const focusProps = focus ? this.props.focusProps : void 0;
+    const focusProps = this.state.focused ? this.props.focusProps : void 0;
     return (
       <Color {...this.props} {...focusProps}>
         <Box {...this.props} {...focusProps}>
@@ -157,7 +147,7 @@ export class Focusable extends Component<FocusableProps> {
             return React.isValidElement(child)
               ? React.cloneElement<any>(child, {
                   ...child.props,
-                  focus,
+                  focus: this.state.focused,
                 })
               : child;
           })}
@@ -172,60 +162,63 @@ export class FocusableContainer extends PureComponent {
   private setRawMode: F1<boolean> | undefined = void 0;
 
   private left(): FocusablePosition | undefined {
-    if (isNaN(state.x)) {
+    if (!state.current) {
       return {
         y: state.minY,
         x: state.xs(state.minY).pop()!,
       };
     }
-    const xs = state.xs(state.y);
-    return xs[0] === state.x
+    const xs = state.xs(state.current.props.y);
+    return xs[0] === state.current.props.x
       ? void 0
       : {
-          x: xs[xs.indexOf(state.x) - 1],
-          y: state.y,
+          x: xs[xs.indexOf(state.current.props.x) - 1],
+          y: state.current.props.y,
         };
   }
 
   private right(): FocusablePosition | undefined {
-    if (isNaN(state.x)) {
+    if (!state.current) {
       return {
         y: state.minY,
         x: state.xs(state.minY)[0],
       };
     }
-    const xs = state.xs(state.y);
-    return xs[xs.length - 1] === state.x
+    const xs = state.xs(state.current.props.y);
+    return xs[xs.length - 1] === state.current.props.x
       ? void 0
       : {
-          x: xs[xs.indexOf(state.x) + 1],
-          y: state.y,
+          x: xs[xs.indexOf(state.current.props.x) + 1],
+          y: state.current.props.y,
         };
   }
 
   private up(): FocusablePosition | undefined {
-    if (isNaN(state.x)) {
+    if (!state.current) {
       return {
         y: state.maxY,
         x: state.xs(state.maxY)[0],
       };
     }
-    const y = seek(state.ys, state.ys.indexOf(state.y) - 1);
+    const y = seek(state.ys, state.ys.indexOf(state.current.props.y) - 1);
     const xs = state.xs(y);
-    if (xs[0] >= state.x) {
+    if (xs[0] >= state.current.props.x) {
       return { y, x: xs[0] };
     }
-    if (xs[xs.length - 1] <= state.x) {
+    if (xs[xs.length - 1] <= state.current.props.x) {
       return { y, x: xs[xs.length - 1] };
     }
     for (let i = 1; i < xs.length; i++) {
-      if (xs[i] === state.x) {
+      if (xs[i] === state.current.props.x) {
         return { y, x: xs[i] };
       }
-      if (xs[i] > state.y) {
+      if (xs[i] > state.current.props.x) {
         return {
           y,
-          x: xs[i] - state.y > state.y - xs[i - 1] ? xs[i - 1] : xs[i],
+          x:
+            xs[i] - state.current.props.x > state.current.props.x - xs[i - 1]
+              ? xs[i - 1]
+              : xs[i],
         };
       }
     }
@@ -233,28 +226,31 @@ export class FocusableContainer extends PureComponent {
   }
 
   private down(): FocusablePosition | undefined {
-    if (isNaN(state.x)) {
+    if (!state.current) {
       return {
         y: state.minY,
         x: state.xs(state.minY)[0],
       };
     }
-    const y = seek(state.ys, state.ys.indexOf(state.y) + 1);
+    const y = seek(state.ys, state.ys.indexOf(state.current.props.y) + 1);
     const xs = state.xs(y);
-    if (xs[0] >= state.x) {
+    if (xs[0] >= state.current.props.x) {
       return { y, x: xs[0] };
     }
-    if (xs[xs.length - 1] <= state.x) {
+    if (xs[xs.length - 1] <= state.current.props.x) {
       return { y, x: xs[xs.length - 1] };
     }
     for (let i = 1; i < xs.length; i++) {
-      if (xs[i] === state.x) {
+      if (xs[i] === state.current.props.x) {
         return { y, x: xs[i] };
       }
-      if (xs[i] > state.y) {
+      if (xs[i] > state.current.props.x) {
         return {
           y,
-          x: xs[i] - state.y > state.y - xs[i - 1] ? xs[i - 1] : xs[i],
+          x:
+            xs[i] - state.current.props.x > state.current.props.x - xs[i - 1]
+              ? xs[i - 1]
+              : xs[i],
         };
       }
     }
@@ -263,7 +259,6 @@ export class FocusableContainer extends PureComponent {
 
   @action.bound
   private handleInput(data: Buffer) {
-    debug('input', data.toString(), this.stdin.listenerCount('data'));
     if (state.ys.length === 0) {
       return;
     }
@@ -284,12 +279,20 @@ export class FocusableContainer extends PureComponent {
       default:
         return;
     }
-    debug('pos', pos);
     if (!pos) {
       return;
     }
-    state.x = pos.x;
-    state.y = pos.y;
+    const item = state.get(pos.x, pos.y);
+    if (state.current === item) {
+      return;
+    }
+    if (state.current) {
+      state.current.setState({ focused: false });
+    }
+    if (item) {
+      item.setState({ focused: true });
+    }
+    state.current = item;
   }
 
   componentDidMount(): void {
