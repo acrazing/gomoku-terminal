@@ -36,6 +36,7 @@ export class UserStore {
     return this.users.get(id);
   }
 
+  @action
   set(doc: Partial<UserGetOutput>, id = doc.id) {
     if (!id) {
       throw new Error('id should not be empty');

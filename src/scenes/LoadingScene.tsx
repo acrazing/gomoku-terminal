@@ -13,16 +13,16 @@ import { userGet } from '../utils/service/api';
 export class LoadingScene extends PureComponent {
   async componentDidMount() {
     if (!User.userId) {
-      Gomoku.path = 'Login';
+      Gomoku.push('Login');
       return;
     }
     try {
       const user = await userGet({});
       User.set(user);
       await Gomoku.initSocket();
-      Gomoku.path = 'RoomList';
+      Gomoku.push('RoomList');
     } catch (e) {
-      Gomoku.path = 'Login';
+      Gomoku.push('Login');
     }
   }
 

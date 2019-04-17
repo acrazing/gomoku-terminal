@@ -141,7 +141,7 @@ export class SocketClient extends TinyEmitter {
         this.reconnect({ code: ev.code, reason: ev.reason });
       }
     };
-    this.ws.onmessage = (event) => {
+    this.ws.onmessage = action((event: MessageEvent) => {
       const message = parse(event.data);
       if (message && message.key === SocketEvents.Ready) {
         this.readyTimer && clearTimeout(this.readyTimer);
@@ -150,9 +150,10 @@ export class SocketClient extends TinyEmitter {
         this.emit(SocketEvents.Connected, message.data);
         this.ws!.onmessage = ({ data }) => this.handleMessage(data);
       }
-    };
+    });
   }
 
+  @action
   private reconnect(ev: any) {
     this.destroy();
     if (this.status === 'connected') {
@@ -164,6 +165,7 @@ export class SocketClient extends TinyEmitter {
     }
   }
 
+  @action
   connect() {
     if (this.status !== 'disconnected') {
       return;
@@ -229,7 +231,7 @@ export class SocketClient extends TinyEmitter {
         delete this.reqs[id];
         reject(new ServiceError(ResponseTimeout));
       }, this.connectTimeout);
-      this.reqs[id] = ({ data, st2, st1 }: Message) => {
+      this.reqs[id] = action(({ data, st2, st1 }: Message) => {
         delete this.reqs[id];
         clearTimeout(h);
         const ct3 = Date.now();
@@ -239,7 +241,7 @@ export class SocketClient extends TinyEmitter {
           reject(new ServiceError(data.code, data.message));
         }
         resolve(data);
-      };
+      });
       this.ws!.send(
         stringify({
           kind: MessageKind.Request,

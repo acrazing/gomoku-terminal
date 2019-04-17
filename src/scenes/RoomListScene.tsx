@@ -5,7 +5,7 @@
 
 import { Box, Color, Text } from 'ink';
 import { pad, padEnd } from 'lodash';
-import { observable } from 'mobx';
+import { action, observable } from 'mobx';
 import { observer } from 'mobx-react/custom';
 import { T_SECOND } from 'monofile-utilities/lib/consts';
 import * as React from 'react';
@@ -16,7 +16,7 @@ import {
   inputFocusProps,
 } from '../components/Focusable';
 import { KeyboardReceiver } from '../components/KeyboardReceiver';
-import { Gomoku, Paths } from '../store/GomokuStore';
+import { Gomoku } from '../store/GomokuStore';
 import { GomokuRoomDocument } from '../types/GomokuModule.idl';
 import { itos } from '../utils/misc/numberFormat';
 
@@ -27,6 +27,12 @@ export class RoomListScene extends Component {
   @observable private loading = false;
   private keys = ['r', 'n'];
 
+  @action
+  private set(error = this.error, loading = this.loading) {
+    this.error = error;
+    this.loading = loading;
+  }
+
   constructor(props: {}) {
     super(props);
   }
@@ -35,31 +41,30 @@ export class RoomListScene extends Component {
     if (this.loading) {
       return;
     }
-    this.loading = true;
+    this.set(void 0, true);
     try {
       Gomoku.listRoom();
-      this.error = '';
+      this.set('', false);
     } catch (e) {
-      this.error = e.message || e + '';
+      this.set(e.message || e + '', false);
     }
-    this.loading = false;
   };
 
   private handleNew = async () => {
     try {
       await Gomoku.enterRoom();
-      Gomoku.path = Paths.Board;
+      Gomoku.push('Board');
     } catch (e) {
-      this.error = e + '';
+      this.set(e + '');
     }
   };
 
   private handleEnter = (room: GomokuRoomDocument) => async () => {
     try {
       await Gomoku.enterRoom(room.id);
-      Gomoku.path = Paths.Board;
+      Gomoku.push('Board');
     } catch (e) {
-      this.error = e + '';
+      this.set(e + '');
     }
   };
 

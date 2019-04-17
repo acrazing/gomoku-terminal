@@ -17,7 +17,7 @@ import {
   inputFocusProps,
 } from '../components/Focusable';
 import { KeyboardReceiver } from '../components/KeyboardReceiver';
-import { Gomoku, Paths } from '../store/GomokuStore';
+import { Gomoku } from '../store/GomokuStore';
 import { User } from '../store/UserStore';
 import { userLogin, userRegister } from '../utils/service/api';
 import { ServiceError } from '../utils/service/ServiceError';
@@ -57,7 +57,7 @@ export class LoginScene extends Component {
       });
       User.login(doc);
       await Gomoku.initSocket();
-      Gomoku.path = Paths.RoomList;
+      Gomoku.push('RoomList');
     } catch (e) {
       this.error = e.message || e + '';
     }
@@ -84,7 +84,7 @@ export class LoginScene extends Component {
       });
       User.login(doc);
       await Gomoku.initSocket();
-      Gomoku.path = Paths.RoomList;
+      Gomoku.push('RoomList');
     } catch (e) {
       if (e instanceof ServiceError && e.code === 404) {
         this.loading = false;

@@ -3,7 +3,7 @@
  * @since 2019-04-12 16:18:50
  */
 
-import { observable, when } from 'mobx';
+import { action, observable, when } from 'mobx';
 import { asyncAction } from 'mobx-async-action';
 import { ANY } from 'monofile-utilities/lib/consts';
 import { Enum } from 'monofile-utilities/lib/enum';
@@ -43,6 +43,11 @@ export class GomokuStore {
   };
   @observable.shallow
   room: GomokuRoomDocument | undefined = undefined;
+
+  @action
+  push(path: Paths) {
+    this.path = path;
+  }
 
   async initSocket() {
     const token = await gomokuGetAccessToken({});
