@@ -10,7 +10,7 @@ require('mobx').configure({ enforceActions: __DEV__ ? 'observed' : 'never' });
 require('mobx-sync').config({ ssr: false });
 
 import { render } from 'ink';
-import { AsyncTrunk } from 'mobx-sync';
+import { AsyncTrunk, ignore } from 'mobx-sync';
 import { createElement } from 'react';
 import yargs, { Arguments } from 'yargs';
 import { Application } from '../scenes/Application';
@@ -38,6 +38,11 @@ const argv = yargs
   .usage('$0 [options]')
   .help().argv as CommandLineArguments;
 
+class Store {
+  user = new UserStore().inject();
+  @ignore gomoku = new GomokuStore().inject();
+}
+
 async function gomoku() {
   if (process.stdout.columns! < 40 || process.stdout.rows! < 20) {
     console.warn(
@@ -64,9 +69,8 @@ async function gomoku() {
     }),
   );
   process.stdout.write('\u001bc');
-  new GomokuStore().inject();
-  const user = new UserStore().inject();
-  const trunk = new AsyncTrunk({ user }, { storage, delay: 50 });
+  const store = new Store();
+  const trunk = new AsyncTrunk(store, { storage, delay: 50 });
   await trunk.init();
   const ink = render(createElement(Application), { debug: false });
   await ink.waitUntilExit();

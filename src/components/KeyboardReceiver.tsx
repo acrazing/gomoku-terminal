@@ -30,6 +30,10 @@ export interface KeyboardReceiverProps {
   onPress?(key: string): void;
 }
 
+export function ignoreCase(input: string): string[] {
+  return (input.toUpperCase() + input.toLowerCase()).split('');
+}
+
 export class KeyboardReceiver extends PureComponent<KeyboardReceiverProps> {
   private stdin: ReadStream | undefined = undefined;
 

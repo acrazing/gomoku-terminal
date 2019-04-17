@@ -8,7 +8,7 @@ import * as React from 'react';
 import { PureComponent } from 'react';
 import { Gomoku } from '../store/GomokuStore';
 import { User } from '../store/UserStore';
-import { userGet } from '../utils/service/api';
+import { API, userGet } from '../utils/service/api';
 
 export class LoadingScene extends PureComponent {
   async componentDidMount() {
@@ -17,8 +17,9 @@ export class LoadingScene extends PureComponent {
       return;
     }
     try {
+      API.config({ token: User.token });
       const user = await userGet({});
-      User.set(user);
+      User.login({ token: User.token, user });
       await Gomoku.initSocket();
       Gomoku.push('RoomList');
     } catch (e) {

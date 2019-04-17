@@ -4,7 +4,7 @@
  */
 
 import { action, observable } from 'mobx';
-import { T_SECOND } from 'monofile-utilities/lib/consts';
+import { noop, T_SECOND } from 'monofile-utilities/lib/consts';
 import { SMap } from 'monofile-utilities/lib/map';
 import { TinyEmitter } from 'tiny-emitter';
 import { F0, F1, F2 } from '../../types/misc';
@@ -73,7 +73,7 @@ export class SocketClient extends TinyEmitter {
   private retryLimit = 0;
   private reconnectTimer: any = null;
   @observable status: Status = 'disconnected';
-  @observable latency = 1024;
+  @observable latency = 0;
   @observable clockOffset = 0;
 
   private destroy() {
@@ -94,7 +94,7 @@ export class SocketClient extends TinyEmitter {
 
   @action
   private open(reason?: any, directly = false) {
-    this.latency = 1024;
+    this.latency = 0;
     if (this.retryLimit <= 0) {
       this.disconnect();
       return;
@@ -201,7 +201,7 @@ export class SocketClient extends TinyEmitter {
     }
     switch (message.kind) {
       case MessageKind.Notify:
-        this.emit(message.key, message.data, data);
+        this.emit(message.key, message.data, noop);
         break;
       case MessageKind.Request:
         const st1 = Date.now();
@@ -253,7 +253,7 @@ export class SocketClient extends TinyEmitter {
     });
   }
 
-  notify<Q>(key: string, data: Q, id = this.uid()) {
+  notify<Q>(key: string, data?: Q, id = this.uid()) {
     this.ws!.send(stringify({ kind: MessageKind.Notify, key, data, id }));
   }
 

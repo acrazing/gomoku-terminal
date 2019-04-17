@@ -17,6 +17,7 @@ import {
 } from '../components/Focusable';
 import { KeyboardReceiver } from '../components/KeyboardReceiver';
 import { Gomoku } from '../store/GomokuStore';
+import { UserInGameAlready } from '../types/GameService.idl';
 import { GomokuRoomDocument } from '../types/GomokuModule.idl';
 import { itos } from '../utils/misc/numberFormat';
 
@@ -43,19 +44,30 @@ export class RoomListScene extends Component {
     }
     this.set(void 0, true);
     try {
-      Gomoku.listRoom();
+      await Gomoku.listRoom();
       this.set('', false);
+      if (__DEV__ && Gomoku.rooms.length > 0) {
+        await this.handleEnter(Gomoku.rooms[0])();
+      }
     } catch (e) {
+      if (e.code === UserInGameAlready.value) {
+        await Gomoku.enterRoom(-1);
+        Gomoku.push('Board');
+      }
       this.set(e.message || e + '', false);
     }
   };
 
   private handleNew = async () => {
+    if (this.loading) {
+      return;
+    }
+    this.set(void 0, true);
     try {
       await Gomoku.enterRoom();
       Gomoku.push('Board');
     } catch (e) {
-      this.set(e + '');
+      this.set(e + '', false);
     }
   };
 

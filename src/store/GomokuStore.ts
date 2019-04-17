@@ -41,8 +41,7 @@ export class GomokuStore {
     freeCount: 0,
     busyCount: 0,
   };
-  @observable.shallow
-  room: GomokuRoomDocument | undefined = undefined;
+  @observable room!: GomokuRoomDocument;
 
   @action
   push(path: Paths) {
@@ -75,7 +74,7 @@ export class GomokuStore {
   enterRoom = asyncAction(
     (roomId?: number) =>
       this.socket.request<RoomEnterEvent, GomokuRoomDocument>('room.enter', {
-        roomId: roomId,
+        roomId: roomId === -1 ? void 0 : roomId,
         prefabId: roomId ? void 0 : this.meta.prefab.id,
       }),
     (room) => {

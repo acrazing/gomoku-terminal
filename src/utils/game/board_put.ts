@@ -12,7 +12,7 @@
 import { itos, stoi } from '../misc/numberFormat';
 import TypedArray = NodeJS.TypedArray;
 
-export class Board<T extends number, B extends TypedArray> {
+export class Board<T extends number, B extends TypedArray = Uint8Array> {
   readonly data: B;
 
   constructor(

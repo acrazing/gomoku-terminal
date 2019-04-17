@@ -13,7 +13,7 @@ import Timer = NodeJS.Timer;
 export class UserStore {
   @ignore
   timer = setInterval(noop, T_DAY) as Timer;
-
+  @ignore
   users = observable.map<number, UserGetOutput>();
 
   @observable userId = 0;
