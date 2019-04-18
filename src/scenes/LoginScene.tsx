@@ -6,7 +6,7 @@
 import { Box, Color, Text } from 'ink';
 import InkTextInput from 'ink-text-input';
 import { memoize } from 'lodash';
-import { observable } from 'mobx';
+import { action, observable } from 'mobx';
 import { observer } from 'mobx-react/custom';
 import * as React from 'react';
 import { Component } from 'react';
@@ -24,27 +24,31 @@ import { ServiceError } from '../utils/service/ServiceError';
 
 @observer
 export class LoginScene extends Component {
-  @observable
-  private username = '';
-  @observable
-  private password = '';
-  @observable error = '';
-  private handleChange = memoize(
-    (key: 'username' | 'password') => (value: string) => {
+  @observable private username = '';
+  @observable private password = '';
+  @observable private error = '';
+  @observable private loading = false;
+
+  @action
+  private set(error = this.error, loading = this.loading) {
+    this.error = error;
+    this.loading = loading;
+  }
+
+  private handleChange = memoize((key: 'username' | 'password') =>
+    action((value: string) => {
       if (value.length > 20) {
         return;
       }
       this[key] = value;
-    },
+    }),
   );
-
-  private loading = false;
 
   private handleAnonymous = async () => {
     if (this.loading) {
       return;
     }
-    this.loading = true;
+    this.set(void 0, true);
     try {
       const doc = await userLogin({
         kind: 'username',
@@ -59,9 +63,8 @@ export class LoginScene extends Component {
       await Gomoku.initSocket();
       Gomoku.push('RoomList');
     } catch (e) {
-      this.error = e.message || e + '';
+      this.set(e + '', false);
     }
-    this.loading = false;
   };
 
   private handleLogin = async () => {
@@ -69,9 +72,10 @@ export class LoginScene extends Component {
       return;
     }
     if (this.username.length < 6 || this.password.length < 6) {
-      this.error = 'Please input username & password, both min length is 6.';
+      this.set('Please input username & password, both min length is 6.');
+      return;
     }
-    this.loading = false;
+    this.set(void 0, true);
     try {
       const doc = await userLogin({
         kind: 'username',
@@ -87,7 +91,6 @@ export class LoginScene extends Component {
       Gomoku.push('RoomList');
     } catch (e) {
       if (e instanceof ServiceError && e.code === 404) {
-        this.loading = false;
         try {
           await userRegister({
             username: this.username,
@@ -96,15 +99,15 @@ export class LoginScene extends Component {
             password: this.password,
             nickname: this.username,
           });
+          this.set(void 0, false);
           await this.handleLogin();
         } catch (e) {
-          this.error = e.message || e + '';
+          this.set(e + '', false);
         }
       } else {
-        this.error = e.message || e + '';
+        this.set(e + '', false);
       }
     }
-    this.loading = false;
   };
 
   private handleExit = () => {

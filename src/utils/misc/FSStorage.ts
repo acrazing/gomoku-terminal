@@ -38,18 +38,44 @@ export class FSStorage implements AsyncStorage {
     }
     const initialData = fs.readFileSync(this.filename, 'utf8');
     if (initialData) {
-      this.data = JSON.parse(initialData);
+      this.data = this.parse(initialData);
     }
   }
 
+  private parse(data: string) {
+    return data
+      .trim()
+      .split('\n')
+      .reduce(
+        (prev, now) => {
+          const sep = now.indexOf(':');
+          if (sep === -1) {
+            throw new Error(`invalid data line(:)`);
+          }
+          prev[now.substr(0, sep)] = now.substr(sep + 1);
+          return prev;
+        },
+        {} as SMap<string>,
+      );
+  }
+
+  private stringify(data: SMap<string>) {
+    return Object.keys(data)
+      .map((key) => `${key}:${data[key]}`)
+      .join('\n');
+  }
+
   destroy() {
-    fs.writeJSONSync(this.filename, this.data);
+    fs.writeFileSync(this.filename, this.stringify(this.data));
     fs.unlinkSync(this.filename + '.lock');
   }
 
   setItem(key: string, value: string): Promise<void> {
+    if (key.indexOf(':') > -1) {
+      throw new Error('invalid item key');
+    }
     this.data[key] = value;
-    return fs.writeJSON(this.filename, this.data);
+    return fs.writeFile(this.filename, this.stringify(this.data));
   }
 
   async getItem(key: string): Promise<string | null> {
@@ -61,6 +87,6 @@ export class FSStorage implements AsyncStorage {
 
   removeItem(key: string): Promise<void> {
     delete this.data[key];
-    return fs.writeJSON(this.filename, this.data);
+    return fs.writeFile(this.filename, this.stringify(this.data));
   }
 }

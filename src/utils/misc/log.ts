@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 import { createWriteStream, WriteStream } from 'fs';
 
 let ws: WriteStream;
-let id = 0;
 
 export function debug(...args: any[]) {
   if (__DEV__) {
@@ -16,7 +15,7 @@ export function debug(...args: any[]) {
     }
     ws.write(
       JSON.stringify(
-        [id++, dayjs().format('YYYY-MM-DD HH:mm:ss.SSS')].concat(args),
+        [process.pid, dayjs().format('YYYY-MM-DD HH:mm:ss.SSS')].concat(args),
       ) + '\n',
     );
   }

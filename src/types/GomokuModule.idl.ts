@@ -37,12 +37,12 @@ export interface GomokuOnlineGameDocument {
   players: GomokuGameUserDocument[];
   createdAt: number;
   record: string;
-  action: GomokuActionDocument;
+  action: GomokuActionDocument | undefined;
 }
 
 export interface GomokuRoomDocument
   extends RoomDocument<GomokuRoomUserDocument> {
-  game: GomokuOnlineGameDocument;
+  game: GomokuOnlineGameDocument | undefined;
 }
 
 export interface GomokuStartEvent extends GomokuOnlineGameDocument {}

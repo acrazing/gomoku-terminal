@@ -88,9 +88,13 @@ export class KeyboardReceiver extends PureComponent<KeyboardReceiverProps> {
 
   componentWillReceiveProps(nextProps: Readonly<KeyboardReceiverProps>): void {
     if (nextProps.focus) {
-      this.stdin!.on('data', this.handleInput);
+      if (!this.props.focus) {
+        this.stdin!.on('data', this.handleInput);
+      }
     } else {
-      this.stdin!.removeListener('data', this.handleInput);
+      if (this.props.focus) {
+        this.stdin!.removeListener('data', this.handleInput);
+      }
     }
   }
 

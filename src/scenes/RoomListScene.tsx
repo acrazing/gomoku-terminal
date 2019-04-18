@@ -15,9 +15,8 @@ import {
   FocusableContainer,
   inputFocusProps,
 } from '../components/Focusable';
-import { KeyboardReceiver } from '../components/KeyboardReceiver';
+import { ignoreCase, KeyboardReceiver } from '../components/KeyboardReceiver';
 import { Gomoku } from '../store/GomokuStore';
-import { UserInGameAlready } from '../types/GameService.idl';
 import { GomokuRoomDocument } from '../types/GomokuModule.idl';
 import { itos } from '../utils/misc/numberFormat';
 
@@ -26,7 +25,10 @@ export class RoomListScene extends Component {
   private refreshTimer!: any;
   @observable private error = '';
   @observable private loading = false;
-  private keys = ['r', 'n'];
+  // keymap:
+  // R: Refresh room list
+  // N: New room
+  private keys = ignoreCase('RN');
 
   @action
   private set(error = this.error, loading = this.loading) {
@@ -46,14 +48,7 @@ export class RoomListScene extends Component {
     try {
       await Gomoku.listRoom();
       this.set('', false);
-      if (__DEV__ && Gomoku.rooms.length > 0) {
-        await this.handleEnter(Gomoku.rooms[0])();
-      }
     } catch (e) {
-      if (e.code === UserInGameAlready.value) {
-        await Gomoku.enterRoom(-1);
-        Gomoku.push('Board');
-      }
       this.set(e.message || e + '', false);
     }
   };
@@ -64,7 +59,7 @@ export class RoomListScene extends Component {
     }
     this.set(void 0, true);
     try {
-      await Gomoku.enterRoom();
+      await Gomoku.enterRoom(null);
       Gomoku.push('Board');
     } catch (e) {
       this.set(e + '', false);
@@ -81,12 +76,10 @@ export class RoomListScene extends Component {
   };
 
   private handlePress = (key: string) => {
-    switch (key) {
-      case 'r':
+    switch (key.toUpperCase()) {
       case 'R':
         this.handleRefresh();
         break;
-      case 'n':
       case 'N':
         this.handleNew();
         break;

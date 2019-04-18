@@ -31,6 +31,7 @@ import {
 import { RoomExitReason, RoomUserStatus } from '../types/RoomModule.idl';
 import { Board, boardDecodeRecord } from '../utils/game/board_put';
 import { Piece } from '../utils/game/GomokuMachine';
+import { debug } from '../utils/misc/log';
 import { itos } from '../utils/misc/numberFormat';
 import { remains } from '../utils/misc/time';
 import { SocketEvents } from '../utils/socket/types';
@@ -195,7 +196,7 @@ export class BoardScene extends Component {
       event.hand.y,
       event.index % 2 ? Piece.White : Piece.Black,
     );
-    Gomoku.room.game.action = event.next!;
+    Gomoku.room.game!.action = event.next;
   }
 
   @action.bound
@@ -211,11 +212,12 @@ export class BoardScene extends Component {
         event.winner === null
           ? 'TIE'
           : (event.winner === 'BLACK') ===
-            (this.me!.seat === Gomoku.room.game!.players[0].userId)
+            (this.me!.id === Gomoku.room.game!.players[0].userId)
           ? 'YOU WIN'
           : 'YOU LOSE'
       }!`,
     );
+    Gomoku.room.game = undefined;
   }
 
   @action.bound
@@ -251,6 +253,7 @@ export class BoardScene extends Component {
   };
 
   private handleReady = async () => {
+    debug('handleReady', process.stdin.listenerCount('data'));
     if (this.loading) {
       return;
     }
@@ -297,7 +300,7 @@ export class BoardScene extends Component {
             data.hand.y,
             data.index % 2 ? Piece.White : Piece.Black,
           );
-          Gomoku.room.game.action = data.next!;
+          Gomoku.room.game!.action = data.next;
           this.set('', false);
         });
       } catch (e) {
@@ -351,10 +354,10 @@ export class BoardScene extends Component {
               : ''}
             {this.it && this.it.offline ? 'Offline' : null}
           </Box>
-          <Box width={31} flexDirection="column">
-            <Color blue={this.loading} red={!this.loading && !!this.error}>
+          <Box width={31} flexDirection="column" alignItems="center">
+            <Color green={this.loading} red={!this.loading && !!this.error}>
               {this.loading ? 'Doing...' : this.error || ' '}
-            </Color>
+            </Color>{' '}
             <Color gray>{'  ' + this.labels.join(' ')}</Color>
             {my.map((y) => {
               return (

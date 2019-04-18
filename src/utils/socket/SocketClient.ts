@@ -7,7 +7,7 @@ import { action, observable } from 'mobx';
 import { noop, T_SECOND } from 'monofile-utilities/lib/consts';
 import { SMap } from 'monofile-utilities/lib/map';
 import { TinyEmitter } from 'tiny-emitter';
-import { F0, F1, F2 } from '../../types/misc';
+import { F0, F1, F2, F4 } from '../../types/misc';
 import { uid } from '../misc/uid';
 import { ResponseTimeout } from '../service/ErrorCode';
 import { ServiceError } from '../service/ServiceError';
@@ -225,7 +225,12 @@ export class SocketClient extends TinyEmitter {
   }
 
   request<Q, S = any>(key: string, data?: Q, id = this.uid()): Promise<S> {
+    this.emit(SocketEvents.Send, MessageKind.Request, key, data, id);
     return new Promise<S>((resolve, reject) => {
+      if (this.status !== 'connected') {
+        reject(new Error(this.status));
+        return;
+      }
       const ct0 = Date.now();
       const h: any = setTimeout(() => {
         delete this.reqs[id];
@@ -254,6 +259,10 @@ export class SocketClient extends TinyEmitter {
   }
 
   notify<Q>(key: string, data?: Q, id = this.uid()) {
+    this.emit(SocketEvents.Send, MessageKind.Notify, key, data, id);
+    if (this.status !== 'connected') {
+      throw new Error(this.status);
+    }
     this.ws!.send(stringify({ kind: MessageKind.Notify, key, data, id }));
   }
 
@@ -279,6 +288,13 @@ export class SocketClient extends TinyEmitter {
     event: ConnectEvent,
   ): this;
   emit(key: SocketEvents.Connected, event: ReadyEvent): this;
+  emit(
+    key: SocketEvents.Send,
+    mKind: MessageKind,
+    mKey: string,
+    mData: any,
+    mId: string,
+  ): this;
   emit(key: SocketEvents.Disconnected, event: DisconnectEvent | void): this;
   emit(
     key: SocketEvents.Message,
@@ -309,6 +325,11 @@ export class SocketClient extends TinyEmitter {
   on(
     key: SocketEvents.Message,
     callback: F2<Message | void, string | Uint8Array>,
+    once?: boolean,
+  ): this;
+  on(
+    key: SocketEvents.Send,
+    callback: F4<MessageKind, string, any, string, void>,
     once?: boolean,
   ): this;
   on(key: SocketEvents, callback: Function, once = false) {

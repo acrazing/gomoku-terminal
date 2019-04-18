@@ -18,6 +18,8 @@ export enum SocketEvents {
   Disconnected = 'socket/disconnected',
   // 收到消息
   Message = 'socket/message',
+  // 发送消息
+  Send = 'socket/send',
 }
 
 export interface ConnectEvent {

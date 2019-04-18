@@ -44,9 +44,9 @@ class Store {
 }
 
 async function gomoku() {
-  if (process.stdout.columns! < 40 || process.stdout.rows! < 20) {
+  if (process.stdout.columns! < 71 || process.stdout.rows! < 20) {
     console.warn(
-      'WARNING: your terminal size is less than 40(w) x 20(h), please resize your window.',
+      'WARNING: your terminal size is less than 71(w) x 20(h), please resize your window.',
     );
   }
   API.config({ host: argv.api });
@@ -56,6 +56,8 @@ async function gomoku() {
     console.log('exiting...');
     storage.destroy();
   });
+  process.on('unhandledRejection', () => process.exit(1));
+  process.on('uncaughtException', () => process.exit(1));
   const signals: Signals[] = [
     'SIGTERM',
     'SIGHUP',
@@ -63,11 +65,7 @@ async function gomoku() {
     'SIGQUIT',
     'SIGABRT',
   ];
-  signals.forEach((signal) =>
-    process.on(signal, () => {
-      process.exit(0);
-    }),
-  );
+  signals.forEach((signal) => process.on(signal, () => process.exit(0)));
   process.stdout.write('\u001bc');
   const store = new Store();
   const trunk = new AsyncTrunk(store, { storage, delay: 50 });
